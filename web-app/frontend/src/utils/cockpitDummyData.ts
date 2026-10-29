@@ -7,7 +7,7 @@ export const AI_PANEL_INDICES = ["SENSEX"] as const;
 export type AiPanelIndex = (typeof AI_PANEL_INDICES)[number];
 
 export const AI_PANEL_LABELS: Record<AiPanelIndex, string> = {
-  NIFTY: "NIFTY 50",
+  SENSEX: "SENSEX",
 };
 
 export interface IndexStrategyInsight {
@@ -25,7 +25,7 @@ export interface IndexStrategyInsight {
 }
 
 export const strategyByIndex: Record<AiPanelIndex, IndexStrategyInsight> = {
-  NIFTY: {
+  SENSEX: {
     name: "VWAP RECLAIM",
     bias: "BULLISH",
     confidence: 78,
@@ -38,15 +38,15 @@ export const strategyByIndex: Record<AiPanelIndex, IndexStrategyInsight> = {
       "5m structure turned bullish above EMA21",
       "OI buildup at ATM calls supports upside",
     ],
-    entryLow: 23850,
-    entryHigh: 23870,
-    targets: [24100, 24250],
-    stopLoss: 23720,
+    entryLow: 79800,
+    entryHigh: 79900,
+    targets: [80500, 81000],
+    stopLoss: 79200,
   },
 };
 
 export function indexStep(underlying: string): number {
-  if (underlying === "BANKNIFTY") return 100;
+  if (underlying === "SENSEX" || underlying === "BANKNIFTY" || underlying === "BANKEX") return 100;
   return 50;
 }
 
@@ -75,18 +75,18 @@ export const COCKPIT_DUMMY = {
     vix: 12.48,
     vixChangePct: -1.42,
   },
-  strategy: strategyByIndex.NIFTY,
+  strategy: strategyByIndex.SENSEX,
   position: {
-    tsym: "NIFTY 24 JUL 23,900 CE",
+    tsym: "SENSEX 12 NOV 80,000 CE",
     side: "BUY",
     optionType: "CE",
     lots: 2,
-    quantity: 100,
+    quantity: 40,
     entryPrice: 142.5,
     ltp: 158.9,
-    indexEntry: 23872.5,
-    indexLtp: 23905.3,
-    unrealizedPnl: 3280,
+    indexEntry: 79850,
+    indexLtp: 80100,
+    unrealizedPnl: 1312,
     pnlPct: 1.37,
     setupType: "VWAP RECLAIM",
     stopLoss: 118.0,
