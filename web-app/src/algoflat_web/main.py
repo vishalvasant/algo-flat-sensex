@@ -172,11 +172,11 @@ async def market_summary(_user: User) -> dict[str, Any]:
             data = resp.json()
         except Exception:
             data = {
-                "underlying": "NIFTY",
-                "active_underlying": "NIFTY",
+                "underlying": "SENSEX",
+                "active_underlying": "SENSEX",
                 "trading_mode": health_mode,
                 "commodities": [
-                    {"underlying": "NIFTY", "display_name": "NIFTY 50", "spot_ltp": None, "atm_strike": None},
+                    {"underlying": "SENSEX", "display_name": "SENSEX", "spot_ltp": None, "atm_strike": None},
                 ],
                 "spot_ltp": None,
                 "session_vwap": None,
@@ -1043,8 +1043,8 @@ async def watchlist(_user: User) -> dict[str, Any]:
             return resp.json()
         except Exception:
             return {
-                "underlying": "NIFTY",
-                "active_underlying": "NIFTY",
+                "underlying": "SENSEX",
+                "active_underlying": "SENSEX",
                 "commodities": [],
                 "spot_ltp": None,
                 "atm_strike": None,
@@ -1057,7 +1057,7 @@ async def watchlist(_user: User) -> dict[str, Any]:
 @app.get("/api/chart/candles")
 async def chart_candles(
     _user: User,
-    underlying: str = "NIFTY",
+    underlying: str = "SENSEX",
     interval: str = "15m",
     days: int = 30,
     token: str | None = None,

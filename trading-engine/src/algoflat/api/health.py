@@ -1073,6 +1073,12 @@ async def _build_market_summary() -> dict[str, Any]:
             ml_prediction=ml,
             last_entry_block=_engine_app.orchestrator.last_entry_block,
             last_entry_confirm=_engine_app.orchestrator.last_entry_confirm,
+            underlying=str(
+                summary.get("active_underlying")
+                or summary.get("underlying")
+                or _engine_app.config.symbols.get("underlying")
+                or "SENSEX"
+            ),
         )
         summary["market_intelligence"] = mi
         summary["ml_shadow"] = ml

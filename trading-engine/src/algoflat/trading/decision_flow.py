@@ -29,6 +29,18 @@ def _stage(
   return row
 
 
+def _index_display_name(underlying: str | None, *, futures: bool = False) -> str:
+  ul = (underlying or "SENSEX").upper()
+  labels = {
+    "SENSEX": ("SENSEX", "SENSEX FUT"),
+    "BANKEX": ("BANKEX", "BANKEX FUT"),
+    "NIFTY": ("NIFTY 50", "NIFTY FUT"),
+    "BANKNIFTY": ("NIFTY BANK", "BANKNIFTY FUT"),
+  }
+  cash_name, fut_name = labels.get(ul, (ul, f"{ul} FUT"))
+  return fut_name if futures else cash_name
+
+
 def build_decision_flow(
   features: FeatureSnapshot,
   *,
@@ -42,17 +54,28 @@ def build_decision_flow(
   ml_prediction: dict[str, Any] | None = None,
   last_entry_block: str | None = None,
   last_entry_confirm: str | None = None,
+  underlying: str | None = None,
 ) -> dict[str, Any]:
   """Build ordered stages: Spot → Levels → price → Momentum → CE/PE → Premium → Entry."""
   basis_cfg = basis_cfg or {}
   extra = features.extra or {}
   mi = mi_snapshot or extra.get("market_intelligence") or {}
   cash = extra.get("cash_index_spot")
+  if cash is None and features.nifty_spot is not None:
+    cash = features.nifty_spot
   fut = extra.get("fut_spot")
   basis = extra.get("basis_points")
   structure = extra.get("structure_5m")
   levels = extra.get("levels") or {}
   flow_meta = extra.get("decision_flow") or {}
+  ul = (
+    underlying
+    or extra.get("underlying")
+    or flow_meta.get("underlying")
+    or "SENSEX"
+  )
+  cash_label = _index_display_name(str(ul), futures=False)
+  fut_label = _index_display_name(str(ul), futures=True)
 
   basis_enabled = bool(basis_cfg.get("enabled", True))
   max_basis = expected_max_basis_points(
@@ -188,20 +211,26 @@ def build_decision_flow(
     entry_status = "pending"
     entry_detail = "Waiting for a premium or volume lift"
 
-  index_base = flow_meta.get("vwap_source") == "nse_index"
-  price_name = "NIFTY 50" if index_base else "NIFTY FUT"
+  # Cash-index VWAP (NSE or BSE) vs futures-priced book.
+  index_base = str(flow_meta.get("vwap_source") or "").endswith("_index") or str(
+    flow_meta.get("vwap_source") or ""
+  ) in ("nse_index", "bse_index", "index")
+  if flow_meta.get("vwap_source") is None:
+    # Default for this Sensex stack: cash index drives VWAP / ATM.
+    index_base = True
+  price_name = cash_label if index_base else fut_label
   vwap_side = fut_vs_vwap or "—"
   if (not index_base) and basis is not None and fut_vs_vwap:
     momentum_detail = (
       f"FUT {vwap_side} VWAP · basis {basis:+.1f} pts (limit ±{max_basis:.0f})"
     )
   else:
-    momentum_detail = f"{price_name} {vwap_side} VWAP · 5m {bias.lower()}"
+    momentum_detail = f"{price_name} — VWAP · 5m {bias.lower()}"
 
   stages = [
     _stage(
       stage_id="spot",
-      label="NIFTY 50" if index_base else "NIFTY Spot",
+      label=cash_label if index_base else f"{cash_label} Spot",
       status="ok" if cash is not None else "warn",
       detail=f"₹{float(cash):,.2f}" if cash is not None else "Index quote pending",
       value=cash,
@@ -218,7 +247,7 @@ def build_decision_flow(
     stages.append(
       _stage(
         stage_id="fut",
-        label="NIFTY FUT",
+        label=fut_label,
         status="ok" if fut is not None else "warn",
         detail=f"₹{float(fut):,.2f}" if fut is not None else "Futures quote pending",
         value=fut,
