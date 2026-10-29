@@ -1,0 +1,77 @@
+# NIFTY 50 weekly index options (Upstox)
+# Decision flow: NIFTY cash (levels) → NIFTY FUT (VWAP/momentum/candles) → options.
+# Candles/VWAP/momentum use NIFTY FUT; PDH/PDL/level proximity use NSE NIFTY 50 cash.
+underlying: NIFTY
+price_source: futures
+exchange_spot: NFO
+exchange_options: NFO
+spot_token: ""
+expiry_type: weekly
+atm_strike_steps: 5
+strike_band_points: 250
+strike_step: 50
+tradable_strike: ATM
+instrument_filter: OPTIDX
+
+underlyings:
+  - symbol: NIFTY
+    display_name: NIFTY 50
+    price_source: futures
+    exchange_futures: NFO
+    exchange_spot: NFO
+    exchange_options: NFO
+    index_spot_exchange: NSE
+    index_spot_token: "26000"
+    spot_token: ""
+    strike_step: 50
+    strike_band_points: 250
+    atm_strike_steps: 5
+    tick_size: 0.05
+    fallback_spot: 24000
+
+# Display-only index tickers (no option chain) — live LTP on top bar.
+index_tickers:
+  - symbol: INDIAVIX
+    display_name: INDIA VIX
+    exchange: NSE
+    spot_token: "India VIX"
+    fallback_spot: 13.0
+
+# Sector indices for market intelligence (Phase 7) — quoted via Upstox NSE_INDEX.
+sector_indices:
+  - symbol: BANKNIFTY
+    display_name: NIFTY BANK
+    exchange: NSE
+    spot_token: "Nifty Bank"
+  - symbol: NIFTYIT
+    display_name: NIFTY IT
+    exchange: NSE
+    spot_token: "Nifty IT"
+  - symbol: NIFTYAUTO
+    display_name: NIFTY AUTO
+    exchange: NSE
+    spot_token: "Nifty Auto"
+  - symbol: NIFTYPHARMA
+    display_name: NIFTY PHARMA
+    exchange: NSE
+    spot_token: "Nifty Pharma"
+  - symbol: NIFTYMETAL
+    display_name: NIFTY METAL
+    exchange: NSE
+    spot_token: "Nifty Metal"
+  - symbol: NIFTYFMCG
+    display_name: NIFTY FMCG
+    exchange: NSE
+    spot_token: "Nifty FMCG"
+  - symbol: NIFTYREALTY
+    display_name: NIFTY REALTY
+    exchange: NSE
+    spot_token: "Nifty Realty"
+  - symbol: NIFTYENERGY
+    display_name: NIFTY ENERGY
+    exchange: NSE
+    spot_token: "Nifty Energy"
+  - symbol: NIFTYFIN
+    display_name: NIFTY FIN SERVICE
+    exchange: NSE
+    spot_token: "Nifty Fin Service"

@@ -1,0 +1,13 @@
+# Broker provider: upstox (default) | flattrade (legacy)
+provider: upstox
+api_base_url: "https://api.upstox.com/v2"
+websocket_url: "wss://api.upstox.com/v2/feed/market-data-feed"
+reconnect_backoff_seconds: [1, 2, 4, 8, 16, 32, 60]
+stale_feed_seconds: 45
+token_refresh_before_expiry_minutes: 30
+# REST quote poll interval when WebSocket backup is active
+rest_poll_interval_seconds: 1.5
+# Upstox V3 protobuf WebSocket (primary); REST poll is backup when WS stale
+use_websocket_feed: true
+# ltpc is lighter; full adds depth — REST backup runs when WS ticks absent
+websocket_feed_mode: ltpc

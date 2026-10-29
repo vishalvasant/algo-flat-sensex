@@ -1,0 +1,6 @@
+enabled: true
+mode: shadow
+gate_enabled: false
+model_path: null
+score_threshold: 0.6
+shadow_compare_enabled: true

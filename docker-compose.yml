@@ -1,0 +1,74 @@
+# Algo-Flat Sensex — local development (isolated from algo-flat / NIFTY).
+# Fixed project name so this stack never shares containers/volumes with algo-flat.
+name: algo-flat-sensex
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-algoflatsx}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-algoflatsx}
+      POSTGRES_DB: ${POSTGRES_DB:-algoflatsx}
+      TZ: Asia/Kolkata
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-algoflatsx} -d ${POSTGRES_DB:-algoflatsx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  trading-engine:
+    build: ./trading-engine
+    env_file:
+      - .env
+    environment:
+      CONFIG_DIR: /app/config
+      MIGRATIONS_DIR: /app/db/migrations
+      TZ: Asia/Kolkata
+      DATABASE_URL: postgresql://${POSTGRES_USER:-algoflatsx}:${POSTGRES_PASSWORD:-algoflatsx}@postgres:5432/${POSTGRES_DB:-algoflatsx}
+      FLATTRADE_TOKEN_FILE: /app/.flattrade/session.json
+      UPSTOX_TOKEN_FILE: /app/.upstox/session.json
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      TRADING_MODE: ${TRADING_MODE:-paper}
+    volumes:
+      - ./config:/app/config:ro
+      - ./db/migrations:/app/db/migrations:ro
+      - ./data/archives:/app/data/archives
+      - flattrade_data:/app/.flattrade
+      - upstox_data:/app/.upstox
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${ENGINE_PORT:-8002}:8001"
+    restart: unless-stopped
+
+  web-app:
+    build: ./web-app
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-algoflatsx}:${POSTGRES_PASSWORD:-algoflatsx}@postgres:5432/${POSTGRES_DB:-algoflatsx}
+      TRADING_ENGINE_URL: http://trading-engine:8001
+      TZ: Asia/Kolkata
+      WEB_USERNAME: ${WEB_USERNAME:-admin}
+      WEB_PASSWORD: ${WEB_PASSWORD:-algoflatsx}
+      JWT_SECRET: ${JWT_SECRET:-change-me-sensex-in-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      trading-engine:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8081}:8080"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  flattrade_data:
+  upstox_data:

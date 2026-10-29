@@ -1,0 +1,19 @@
+{
+  "day": "2026-09-11",
+  "underlying": "NIFTY",
+  "saved_at": "2026-09-11T14:11:18.874981+05:30",
+  "source": "flattrade_tpseries",
+  "note": "Finest available historical bars (1m OHLC + intvwap/oi when present). Not tick-perfect \u2014 broker does not expose historical ticks.",
+  "spot_bars": {
+    "1m": 296,
+    "3m": 99,
+    "5m": 60,
+    "15m": 20
+  },
+  "option_tokens": 22,
+  "option_bars_total": 6500,
+  "prior_day": "2026-09-10",
+  "universe_instruments": 22,
+  "expiry_symbol": "15SEP26",
+  "atm_strike": "23500"
+}

@@ -1,0 +1,8 @@
+timezone: Asia/Kolkata
+market_open: "09:15"
+market_close: "15:30"
+# Entries from market open until 15:00; force flatten open holdings at 15:15 (risk_config).
+trading_window_open: "09:15"
+trading_window_close: "15:00"
+pre_warm_minutes: 5
+holidays_file: config/nse_holidays.json

@@ -1,0 +1,40 @@
+event_queue_max_size: 10000
+reconciliation_interval_seconds: 60
+option_quote_sample_interval_seconds: 1
+# Entry opportunity scan cadence (§26A — preserve baseline; do not reduce globally).
+# Scalp v3.0 — faster opportunity scan (was 10s).
+scan_interval_seconds: 5
+# Entry decisions: periodic timer only (matches honest backtest). Quotes still update LTP/OI.
+entry_scan_on_quote: false
+# Fast premium confirmation on quote ticks AFTER candidate detected (not a full strategy scan).
+# entry_confirmation.fast_confirm_on_quote must also be true.
+# Live exit evaluation cadence — matches backtest_exit_interval_seconds.
+exit_eval_interval_seconds: 2
+# Backtest only: mark exits this often (live uses exit_eval_interval_seconds).
+backtest_exit_interval_seconds: 2
+# Live: sync Flattrade holdings + margin into algo state (seconds).
+rest_quote_poll_interval_seconds: 30
+rest_index_poll_interval_seconds: 10
+rest_quote_poll_interval_market_seconds: 2
+rest_quote_poll_interval_ws_backup_seconds: 15
+# When a holding gets no WS tick for this long, REST poll that token (1s loop).
+holding_ws_stale_seconds: 3
+holding_rest_poll_seconds: 1
+watchlist_stream_interval_ms: 500
+# REST backup for option-chain LTP/OI when WebSocket is thin.
+chain_rest_poll_seconds: 8
+# Poll individual chain tokens when no WS tick for this many seconds.
+option_ws_stale_seconds: 1.5
+option_stale_poll_batch: 12
+
+# Daily archive + purge for log tables (keeps DB small).
+# Rows older than keep_days (IST) are written to archive_dir then deleted.
+log_retention:
+  enabled: true
+  keep_days: 1
+  run_at_ist: "15:35"
+  archive_dir: ./data/archives
+  tables:
+    - system_events
+    - notifications
+    - field_availability_log

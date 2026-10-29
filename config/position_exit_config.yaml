@@ -1,0 +1,75 @@
+# Exits — unlimited upside runners:
+#   1) Hard SL ~5% against entry
+#   2) Profit trail only (lock 55% of peak open profit on pullback) — NOT a take-profit
+#   3) Session flatten at force_exit_time (15:15) if still open
+# No mid-day time_stop, no profit target, no partial book — trail as long as the move lasts.
+mode: momentum
+bias_flip_exit: false
+bias_flip_buffer_points: 15
+flip_on_trend_reversal: false
+flip_exit_reasons:
+  - trend_reversal
+
+min_hold_seconds: 15
+broker_adopted_min_hold_seconds: 60
+post_exit_adopt_cooldown_seconds: 20
+max_ltp_jump_pct_per_tick: 15
+exit_confirm_ticks: 2
+exit_reject_backoff_seconds: 20
+trend_reversal_min_hold_seconds: 180
+trend_reversal_skip_when_profitable: true
+trend_reversal_only_if_underwater: true
+trend_reversal_defer_if_had_mfe: true
+trend_reversal_min_mfe_pct: 3
+
+# No mid-day timer — green trades ride until trail pullback or 15:15 flatten.
+max_hold_minutes: 0
+skip_time_stop_when_profitable: true
+time_stop_green_max_mfe_pct: 2.5
+
+max_loss_inr_per_trade: 0
+
+adverse_move_pct_from_entry: 5
+adverse_move_min_pct: 5
+confidence_adverse_scaling: false
+adverse_base_confidence: 76
+adverse_max_confidence: 100
+high_vol_adverse_move_pct_from_entry: 5
+weak_entry_adverse_pct: 5
+weak_entry_greeks_mult_threshold: 0.80
+
+never_green_scratch_enabled: false
+never_green_scratch_min_hold_seconds: 5
+never_green_scratch_max_mfe_pct: 0.3
+never_green_scratch_loss_pct: 0.8
+
+require_thesis_invalidation_for_early_cut: false
+thesis_invalidation_enabled: false
+premium_structure_exit_enabled: false
+premium_structure_min_bars: 5
+premium_structure_min_hold_seconds: 180
+premium_structure_vwap_buffer_pct: 0.15
+premium_structure_max_mfe_pct: 2.5
+# Never book partial profit — full size trails until pullback or session end.
+partial_exit_enabled: false
+partial_exit_mfe_pct: 3
+partial_exit_fraction: 0.5
+trail_step_buffer_pct_after_partial: 1.5
+
+early_invalidation_enabled: false
+early_invalidation_min_hold_seconds: 45
+early_invalidation_max_mfe_pct: 2
+early_invalidation_loss_pct: 5
+early_invalidation_exempt_setups:
+  - opening_range_breakout
+  - broker_adopted
+
+# Pullback trail (not a profit cap): lock 55% of peak open profit.
+# Arms after +1.5% MFE so the first tick of green does not scratch a runner.
+# Upside is uncapped — keep riding until floor is hit or 15:15.
+profit_trail_lock_pct: 0.55
+profit_trail_arm_mfe_pct: 1.5
+# Legacy step-trail knobs (unused while profit_trail_lock_pct is set).
+trail_breakeven_arm_mfe_pct: 1.5
+trail_step_arm_mfe_pct: 2.5
+trail_step_buffer_pct: 1.5

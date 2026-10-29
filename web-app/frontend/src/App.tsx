@@ -1,0 +1,37 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthContext";
+import { Layout } from "./components/Layout";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { DashboardPage } from "./pages/DashboardPage";
+import { DecisionLogsPage } from "./pages/DecisionLogsPage";
+import { FlattradeSettingsPage } from "./pages/FlattradeSettingsPage";
+import { HoldingsPage } from "./pages/HoldingsPage";
+import { LoginPage } from "./pages/LoginPage";
+import { NotificationsPage } from "./pages/NotificationsPage";
+import { OptionChainPage } from "./pages/OptionChainPage";
+import { OrderBookPage } from "./pages/OrderBookPage";
+import { TradesPage } from "./pages/TradesPage";
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route element={<Layout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="options-chain" element={<OptionChainPage />} />
+            <Route path="holdings" element={<HoldingsPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="trades" element={<TradesPage />} />
+            <Route path="order-book" element={<OrderBookPage />} />
+            <Route path="logs" element={<DecisionLogsPage />} />
+            <Route path="settings/broker" element={<FlattradeSettingsPage />} />
+            <Route path="settings/flattrade" element={<Navigate to="/settings/broker" replace />} />
+          </Route>
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AuthProvider>
+  );
+}

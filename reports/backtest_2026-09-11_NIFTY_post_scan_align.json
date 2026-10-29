@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-11",
+  "spot_open": 23405.0,
+  "spot_close": 23575.0,
+  "spot_change": 170.0,
+  "session_vwap": 23465.28103123035,
+  "capital_start": 25000.0,
+  "capital_end": 25000.0,
+  "total_pnl": 0.0,
+  "peak_deployed": 0.0,
+  "peak_util_pct": 0.0,
+  "rules": {
+    "max_deployed_pct_of_equity": 90,
+    "max_premium_pct_of_available": 90,
+    "max_daily_loss": 5000,
+    "confidence_lot_sizing": {
+      "enabled": true,
+      "mode": "dynamic",
+      "base_confidence": 80,
+      "max_confidence": 100,
+      "min_capital_pct": 30,
+      "max_capital_pct": 90,
+      "aggressive_deploy_min_confidence": 90,
+      "max_lots": 0
+    },
+    "exits": "5% SL \u00b7 progressive trail from 1.5% MFE \u00b7 no time-stop when green",
+    "strike_selection": "ATM\u00b11 via BS delta/gamma",
+    "flip_on_trend_reversal": true,
+    "exit_tick_seconds": 2,
+    "entry_scan_seconds": 5,
+    "cadence": "live_parity",
+    "honest_replay": false
+  },
+  "signals_seen": 84,
+  "entries_filled": 0,
+  "trades": [],
+  "skips": {
+    "decision_pipeline_veto: no_trade_preferred": 1181,
+    "decision_pipeline_veto: abnormal_spread, reversal_needs_extension": 14,
+    "decision_pipeline_veto: reversal_needs_extension": 16,
+    "validator:tod_open_setup_not_allowed,pe_above_vwap_trap,option_m1_mome": 7,
+    "validator:tod_open_setup_not_allowed,pe_above_vwap_trap,spread_too_wid": 7,
+    "validator:tod_open_setup_not_allowed,spread_too_wide": 7,
+    "validator:tod_open_setup_not_allowed,ce_below_vwap_trap,option_premium": 14,
+    "decision_pipeline_veto: abnormal_spread": 644,
+    "validator:spread_too_wide": 21,
+    "validator:option_m1_momentum_weak,option_side_mtf_weak,spread_too_wide": 7,
+    "validator:mtf_score_too_low,option_side_mtf_weak,spread_too_wide": 7,
+    "validator:ce_against_5m_structure,spread_too_wide": 14
+  }
+}

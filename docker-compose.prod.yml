@@ -1,0 +1,14 @@
+# Production overlay — use on server with proxy:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.proxy.yml up -d
+#
+# Never publish host ports here (Traefik owns 80/443). Publishing :8080 conflicts with
+# Traefik's dashboard bind and can destabilize other stacks on small hosts.
+services:
+  postgres:
+    ports: !reset []
+
+  trading-engine:
+    ports: !reset []
+
+  web-app:
+    ports: !reset []

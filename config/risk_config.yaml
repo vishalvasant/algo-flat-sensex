@@ -1,0 +1,59 @@
+account_capital_inr: 25000
+# Single shared capital pool for NIFTY paper/live trading.
+use_pooled_capital: true
+# Each new entry may use up to this % of currently available capital (at trade time).
+max_premium_pct_of_available: 90
+# Total deployed premium cap as % of equity (starting + realized P&L).
+max_deployed_pct_of_equity: 90
+default_lots: 1
+confidence_lot_sizing:
+  enabled: true
+  # dynamic = confidence score scales capital %, then buy max affordable lots.
+  mode: dynamic
+  base_confidence: 80
+  max_confidence: 100
+  # At router minimum (76) deploy 30%; linear ramp to 90% by conf 90+.
+  min_capital_pct: 30
+  max_capital_pct: 90
+  # Confidence >= 90 → deploy 90% of available margin.
+  aggressive_deploy_min_confidence: 90
+  # 0 = no fixed lot cap — only capital, confidence, and greeks confirmation apply.
+  max_lots: 0
+# Scale deployable budget by latest delta/gamma/IV confirmation (no fixed lot caps).
+greeks_lot_sizing:
+  enabled: true
+  ideal_delta_min: 0.35
+  ideal_delta_max: 0.65
+  near_delta_min: 0.25
+  near_delta_max: 0.75
+  min_gamma_ok: 0.0004
+  min_gamma_strong: 0.001
+  max_iv: 0.85
+  min_multiplier: 0.55
+# 0 = no daily trade-count cap. Entries still need a valid setup, risk rules, and free capital.
+max_trades_per_day: 0
+# 0 = no count cap. A new contract is bought when its setup qualifies and a lot still fits.
+max_concurrent_positions: 0
+# 0 = unlimited concurrent NIFTY positions; capital deploy limits still apply.
+max_concurrent_positions_per_index: 0
+# 0 = no consecutive-loss stop. A losing streak does not block the next setup.
+max_consecutive_losses: 0
+block_entries_on_consecutive_losses: false
+# Day loss brake: 30% of that day's starting capital (open equity at session start).
+# Blocks new buys and flattens open holdings when day P&L hits -limit.
+block_entries_on_daily_loss: true
+max_daily_loss_pct_of_starting: 30
+# Fixed INR fallback only when pct is unset/0 (kept for back-compat).
+max_daily_loss: 0
+force_exit_time: "15:15"
+# Seconds after any exit before next entry (global). Prefer seconds over minutes.
+cooldown_after_exit_seconds: 20
+cooldown_after_exit_minutes: 0
+# After a losing exit on the same contract (same token).
+loss_exit_cooldown_seconds: 20
+loss_exit_cooldown_minutes: 0
+kill_switch_flatten: true
+# Expiry day: tighter deploy cap (75% vs 90% on normal days).
+expiry_day_sizing:
+  enabled: true
+  max_capital_pct: 75

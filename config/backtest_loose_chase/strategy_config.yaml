@@ -1,0 +1,436 @@
+active_scanner: router
+strategy_version: strategy_router_v2.9.1_option_chart_mtf
+
+# Rule-based router (no LLM). Pick one strategy or NO_TRADE.
+router:
+  # Scalp v3.0 — earlier entries on premium moves (was 80).
+  min_confidence: 73
+  log_every_decision: true
+  # Skip identical consecutive NO_TRADE rows; emit a heartbeat every N seconds.
+  log_dedupe_identical_no_trade: true
+  log_no_trade_repeat_seconds: 120
+  enabled_strategies:
+    - vwap_reclaim
+    - vwap_pullback
+    - vwap_rejection
+    - opening_range_breakout
+    - momentum_continuation
+    - vwap_trend
+    - trend_day
+    - gap_and_go
+    - gap_fade
+    - pdh_pdl_break
+    - expiry_scalping
+    - peak_reversal_fade
+    - level_rejection
+    - oi_breakout
+    - delta_momentum
+    - liquidity_sweep
+
+# Support / resistance map (Phase A–D).
+levels:
+  proximity_points: 20
+  cluster_step_points: 10
+  swing_lookback_bars: 6
+  entry_filter_enabled: true
+  entry_filter_exempt_setups:
+    - opening_range_breakout
+    - gap_and_go
+    - pdh_pdl_break
+    - cpr_breakout
+    - level_rejection
+    - peak_reversal_fade
+    - gap_fade
+  counter_trend_setups:
+    - peak_reversal_fade
+    - level_rejection
+    - mean_reversion
+    - reversal
+  require_close_beyond_level: true
+  break_buffer_points: 5
+  min_retest_bars: 0
+  rejection_enabled: true
+  rejection_wick_proximity_points: 15
+  min_vwap_extension_points: 12
+  min_rejection_signals: 1
+  expiry_min_rejection_signals: 2
+  sweep_proximity_points: 10
+
+# Fade extended moves against 5m bias using 5m + 15m reversal structure.
+counter_bias:
+  enabled: true
+  min_extension_points: 15
+  min_reversal_signals: 2
+  min_counter_mtf_score: 42
+  require_1m_turn: true
+  # When bias-side MTF confidence lags counter-side (CE weak in bull, etc.).
+  min_bias_confidence_gap: 15
+  max_bias_side_mtf_score: 52
+  mismatch_min_extension_points: 12
+  mismatch_min_reversal_signals: 1
+  mismatch_min_counter_mtf_score: 43
+
+# Multi-TF candle patterns (Phase A–C) — wait until structure aligns.
+mtf_patterns:
+  enabled: true
+  # Scalp v3.0 — pattern score is sparse on fast moves (was 55).
+  min_score_to_trade: 48
+  # Soft boost above this (already in quality gate).
+  boost_score: 75
+
+regime:
+  # soft = penalize out-of-regime strategies; hard = block them entirely
+  filter_mode: soft
+  sideways_penalty: 18
+  gap_mode_penalty: 15
+  expiry_mode_penalty: 12
+  high_vol_atr_mult: 1.4
+  low_vol_atr_mult: 0.7
+  atr_lookback_bars: 14
+  sideways_range_points: 25
+  structure_lookback_5m: 6
+  block_sideways: false
+  sideways_allowed_strategies:
+    - level_rejection
+    - opening_range_breakout
+    - peak_reversal_fade
+    - gap_and_go
+    - pdh_pdl_break
+    - oi_breakout
+    - delta_momentum
+  expiry_mode:
+    enabled: true
+    allowed_strategies:
+      - peak_reversal_fade
+      - level_rejection
+  block_high_volatility: false
+  max_risk_score_to_trade: 85
+  expiry_day_risk_penalty: 0
+  # Minutes after 09:30 IST for open/late session phases (regime + cautious gates).
+  session_open_minutes: 45
+  session_late_after_minutes: 300
+
+# Gap open playbook — large gap days restrict to gap/ORB setups in first 45m.
+gap_mode:
+  enabled: true
+  min_gap_points: 35
+  rejection_proximity_points: 15
+  gap_up_allowed_strategies:
+    - gap_and_go
+    - gap_fade
+    - opening_range_breakout
+    - momentum_continuation
+    - pdh_pdl_break
+    - peak_reversal_fade
+    - oi_breakout
+    - delta_momentum
+  gap_down_allowed_strategies:
+    - gap_and_go
+    - gap_fade
+    - opening_range_breakout
+    - momentum_continuation
+    - pdh_pdl_break
+    - peak_reversal_fade
+    - oi_breakout
+    - delta_momentum
+
+# Phase 2 — session playbook from open/gap/momentum (FUT-led).
+session_matrix:
+  enabled: true
+  # Gap-up / gap-down buckets only in open phase; after that use flat_trend/sideways.
+  gap_buckets_open_only: true
+  min_gap_points: 35
+  strong_open_extension_points: 15
+  fade_extension_points: 20
+  default_bucket: flat_trend
+  buckets:
+    gap_up_strong_open:
+      - gap_and_go
+      - opening_range_breakout
+      - momentum_continuation
+      - pdh_pdl_break
+      - vwap_trend
+      - trend_day
+      - oi_breakout
+      - delta_momentum
+    gap_up_fade:
+      - gap_fade
+      - peak_reversal_fade
+      - level_rejection
+      - vwap_rejection
+      - vwap_pullback
+      - vwap_trend
+      - momentum_continuation
+      - delta_momentum
+      - opening_range_breakout
+    gap_down_strong_open:
+      - gap_and_go
+      - opening_range_breakout
+      - momentum_continuation
+      - pdh_pdl_break
+      - vwap_trend
+      - trend_day
+      - oi_breakout
+      - delta_momentum
+    gap_down_fade:
+      - gap_fade
+      - peak_reversal_fade
+      - level_rejection
+      - vwap_rejection
+    flat_trend:
+      - vwap_trend
+      - vwap_pullback
+      - vwap_reclaim
+      - momentum_continuation
+      - trend_day
+      - pdh_pdl_break
+      - oi_breakout
+      - delta_momentum
+    sideways_range:
+      - level_rejection
+      - peak_reversal_fade
+      - opening_range_breakout
+      - gap_fade
+      - pdh_pdl_break
+      - oi_breakout
+      - vwap_rejection
+    expiry_day:
+      - peak_reversal_fade
+      - level_rejection
+
+# DTE-based playbook — theta accelerates Thu/Fri; fresh series Wed after roll.
+expiry_distance:
+  enabled: true
+  thresholds:
+    fresh_series_min_dte: 6
+    theta_week_min_dte: 3
+    theta_week_max_dte: 5
+    theta_week_late_max_dte: 4
+    pre_expiry_max_dte: 2
+  buckets:
+    fresh_series:
+      - vwap_trend
+      - vwap_pullback
+      - vwap_reclaim
+      - momentum_continuation
+      - trend_day
+      - opening_range_breakout
+      - gap_and_go
+      - gap_fade
+      - pdh_pdl_break
+      - delta_momentum
+      - peak_reversal_fade
+      - level_rejection
+      - oi_breakout
+      - vwap_rejection
+    pre_expiry:
+      - vwap_trend
+      - vwap_pullback
+      - vwap_reclaim
+      - momentum_continuation
+      - trend_day
+      - opening_range_breakout
+      - gap_and_go
+      - pdh_pdl_break
+      - delta_momentum
+      - peak_reversal_fade
+      - level_rejection
+      - oi_breakout
+    theta_week:
+      - vwap_trend
+      - vwap_pullback
+      - vwap_reclaim
+      - momentum_continuation
+      - opening_range_breakout
+      - pdh_pdl_break
+      - peak_reversal_fade
+      - level_rejection
+      - oi_breakout
+      - vwap_rejection
+    # Fri (DTE 4) — ORB/breakouts fail; fades + VWAP only.
+    theta_week_late:
+      - vwap_trend
+      - vwap_pullback
+      - vwap_reclaim
+      - peak_reversal_fade
+      - level_rejection
+      - vwap_rejection
+    expiry_day:
+      - peak_reversal_fade
+      - level_rejection
+
+# FUT-first: 5m/15m bias; 1m only for open/fade/rejection setups.
+# Decision flow: cash index → levels/structure → FUT VWAP/momentum → CE/PE → premium → entry.
+fut_first:
+  enabled: true
+  trend_use_5m_momentum: true
+  require_1m_trigger_setups:
+    - opening_range_breakout
+    - gap_and_go
+    - gap_fade
+    - level_rejection
+    - peak_reversal_fade
+    - expiry_scalping
+    - pdh_pdl_break
+
+# Require N consecutive scans with same signal before entry (§26A strategy-specific).
+entry_confirmation:
+  enabled: true
+  # Scalp v3.0 — single-scan entry when signal is fresh (was 2).
+  required_scans: 1
+  max_wait_seconds: 45
+  # High-confidence signals enter on first scan (reduces missed trades).
+  high_confidence_bypass: 85
+  # Fast confirm on quote ticks after candidate — does NOT change scan interval.
+  fast_confirm_on_quote: true
+  fast_confirm_apply_setups:
+    - expiry_scalping
+    - gap_and_go
+    - opening_range_breakout
+    - momentum_continuation
+    - delta_momentum
+    - vwap_pullback
+    - vwap_trend
+    - pdh_pdl_break
+  exempt_setups:
+    - trend_reversal_flip
+    - peak_reversal_fade
+    - level_rejection
+  setup_overrides:
+    vwap_reclaim:
+      required_scans: 1
+    vwap_pullback:
+      required_scans: 1
+    opening_range_breakout:
+      required_scans: 1
+    gap_and_go:
+      required_scans: 1
+    peak_reversal_fade:
+      required_scans: 1
+    level_rejection:
+      required_scans: 1
+    momentum_continuation:
+      required_scans: 1
+    expiry_scalping:
+      required_scans: 1
+    delta_momentum:
+      required_scans: 1
+  # Fast path for gap/ORB in first 15m after 09:30 entry window.
+  open_window_minutes: 15
+  open_window_exempt_setups:
+    - gap_and_go
+    - opening_range_breakout
+
+# Session-scoped pause after sustained losses (router skips paused setups).
+strategy_learner:
+  demote_after_losses: 3
+  demote_multiplier: 0.65
+  pause_after_session_losses: 2
+  pause_rest_of_session: true
+  min_trades_before_demote: 8
+
+vwap_reclaim:
+  bias_timeframe: 5m
+  setup_timeframe: 3m
+  trigger_timeframe: 1m
+  setup_lookback_bars: 8
+  trigger_lookback_bars: 5
+  max_distance_to_vwap_points: 30
+  neutral_bias_blocks_trade: true
+
+vwap_pullback:
+  setup_timeframe: 3m
+  trigger_timeframe: 1m
+  setup_lookback_bars: 10
+  # Stronger extension before pullback is valid (wait for real move).
+  min_extension_points: 12
+  max_distance_to_vwap_points: 22
+  trigger_lookback_bars: 4
+  neutral_bias_blocks_trade: true
+
+vwap_trend:
+  min_bars_on_side: 4
+  min_distance_to_vwap_points: 10
+  max_distance_to_vwap_points: 40
+  require_1m_momentum: true
+  neutral_bias_blocks_trade: true
+
+strike_selection:
+  enabled: true
+  # Trade band: prefer ATM; if ATM has no scope, allow ATM±2.
+  atm_band_steps: 2
+  prefer_atm_first: true
+  modes: [atm]
+  atm_target_delta: 0.50
+  target_delta: 0.50
+  delta_min: 0.40
+  delta_max: 0.65
+  prefer_higher_gamma: true
+  max_spread_pct: 8
+  min_oi: 25000
+  min_volume: 5000
+  oi_weight: 15
+  volume_weight: 10
+
+# Greeks/OI/volume opportunity bonus applied on top of quality gate confidence.
+opportunity_score:
+  enabled: true
+  max_bonus: 30
+  oi_confirm_bonus: 12
+  volume_bonus: 8
+  oi_floor_bonus: 6
+  greeks_bonus: 8
+  oi_build_bonus: 6
+
+# Fix Specification v1.0 — decision pipeline (hard gates, CE/PE, NO_TRADE, EV).
+decision_pipeline:
+  enabled: true
+  enforce: true
+  shadow_mode: false
+  data_quality:
+    enabled: true
+    max_spread_pct: 2.5
+    max_quote_age_seconds: 30
+  extension:
+    enabled: true
+    # Raised after live Aug 12 — 25pt HIGH was blocking almost all continuation.
+    moderate_points: 20
+    high_points: 40
+    extreme_points: 55
+    continuation_block_states:
+      - EXTREME
+      - EXTREME_EXHAUSTION
+  market_state:
+    sideways:
+      enabled: true
+      dead_range_max_points: 18
+      vwap_chop_min_crosses: 4
+    transition:
+      enabled: true
+      # Scalp v3.0 — allow continuation in chop transitions (was true).
+      block_continuation_in_transition: false
+  chase_filter:
+    enabled: false
+    # BACKTEST ONLY — chase disabled to measure late-entry impact (live unchanged).
+    max_extension_without_retest: 85
+    max_recent_move_points: 100
+  side_selection:
+    enabled: true
+  # Scalp v3.0 — easier to beat NO_TRADE (was 5 / 45).
+    min_edge_over_no_trade: 2
+    no_trade:
+      base_score: 28
+  expected_value:
+    enabled: true
+    min_ev_inr: 0
+    base_gain_inr: 22
+    base_loss_inr: 14
+  confidence_caps:
+    enabled: true
+    extended_continuation: 72
+    mixed_structure: 68
+    regime_transition: 70
+    weak_option_response: 65
+    high_extension: 75
+    high_extension_points: 30
+    absolute_max: 92

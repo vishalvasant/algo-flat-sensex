@@ -1,0 +1,7 @@
+# Flattrade API blocks MKT for API orders — use LMT with reference LTP.
+order_type: LMT
+# MIS intraday on NFO (mapped to Noren product code I in flattrade.py).
+product: MIS
+price_buffer_ticks: 1
+max_retry_attempts: 2
+retry_delay_seconds: 1

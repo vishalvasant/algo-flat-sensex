@@ -1,0 +1,42 @@
+# Decision flow: BSE SENSEX index → weekly options on BFO.
+# Candles, VWAP, momentum, levels, and ATM all use the cash index (token 1).
+underlying: SENSEX
+price_source: index
+exchange_spot: BSE
+exchange_options: BFO
+spot_token: "1"
+expiry_type: weekly
+# Watch / trade band: ATM ± 5 strikes (strike step 100 → ±500 pts).
+atm_strike_steps: 5
+strike_band_points: 500
+strike_step: 100
+tradable_strike: ATM
+instrument_filter: OPTIDX
+atm_from_cash_index: true
+
+underlyings:
+  - symbol: SENSEX
+    display_name: SENSEX
+    price_source: index
+    exchange_spot: BSE
+    exchange_options: BFO
+    index_spot_exchange: BSE
+    index_spot_token: "1"
+    spot_token: "1"
+    strike_step: 100
+    strike_band_points: 500
+    atm_strike_steps: 5
+    tick_size: 0.05
+    fallback_spot: 80000
+    lot_size: 20
+    atm_from_cash_index: true
+
+# Display-only index tickers (no option chain) — live LTP on top bar.
+index_tickers: []
+
+# Optional sector / related indices for market intelligence (not traded here).
+sector_indices:
+  - symbol: BANKEX
+    display_name: BSE BANKEX
+    exchange: BSE
+    spot_token: "12"

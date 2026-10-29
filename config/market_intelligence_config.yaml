@@ -1,0 +1,82 @@
+# New-Engine market intelligence — phased rollout (spec New-Enggine.md §40)
+enabled: true
+version: mi_v1.0.0
+
+phases:
+  normalize: true      # Phase 1
+  fut_features: true   # Phase 2
+  vix: true            # Phase 3
+  premium_confirm: true # Phase 4
+  ce_pe_scoring: true  # Phase 5
+  breadth: true        # Phase 6 (sector-proxy when stock breadth unavailable)
+  sectors: true        # Phase 7
+  global: true         # Phase 8
+  regime_inputs: true  # Phase 9
+  extension_ev: true   # Phase 10
+  ml_shadow: true      # Phase 11–14
+
+vix:
+  symbol: INDIAVIX
+  elevated_level: 16.0
+  compressed_level: 12.0
+
+premium_confirm:
+  min_premium_momentum_pct: 0.15
+  max_spread_pct: 12.0
+  require_iv_available: false
+
+ce_pe_scoring:
+  min_strength_gap: 8
+  both_weak_threshold: 42
+  weights:
+    momentum: 0.25
+    volume: 0.15
+    oi_change: 0.15
+    spread: 0.15
+    delta: 0.15
+    vwap_distance: 0.15
+
+breadth:
+  use_sector_proxy: true
+  unavailable_ok: true
+
+sectors:
+  min_positive_for_bullish: 5
+  min_negative_for_bearish: 5
+
+global:
+  # GIFT NIFTY removed from the app — global context uses VIX only.
+  gift_symbol: ""
+  weight_gift: 0
+  weight_vix: 0.3
+
+divergence:
+  hidden_strength_breadth_pct: 55
+  narrow_rally_breadth_pct: 45
+
+early_bird:
+  spot_flat_pct: 0.08
+  relative_volume_min: 1.15
+  breadth_improve_min: 52
+  min_signals: 3
+
+reversal:
+  extension_pts: 25
+  weak_breadth_pct: 45
+  weak_sector_pct: 45
+  fut_weakening_pct: -0.05
+  min_signals: 2
+
+regime:
+  enabled: true
+  vix_weight: 12
+  breadth_weight: 10
+  sector_weight: 8
+  spot_fut_align_weight: 10
+
+ml:
+  inherit_from: ml_config.yaml
+
+candidate_log:
+  enabled: true
+  log_all_candidates: true

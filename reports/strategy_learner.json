@@ -1,0 +1,80 @@
+{
+  "multipliers": {
+    "delta_momentum": 1.0,
+    "opening_range_breakout": 0.65,
+    "vwap_reclaim": 1.0,
+    "vwap_trend": 1.0,
+    "trend_day": 1.0,
+    "pdh_pdl_break": 1.0,
+    "momentum_continuation": 1.0,
+    "vwap_pullback": 1.0
+  },
+  "session_paused": [],
+  "stats": {
+    "delta_momentum": {
+      "trades": 21,
+      "wins": 15,
+      "losses": 6,
+      "pnl": 10768.33,
+      "win_rate": 0.714,
+      "expectancy": 512.78
+    },
+    "opening_range_breakout": {
+      "trades": 11,
+      "wins": 1,
+      "losses": 10,
+      "pnl": -7995.44,
+      "win_rate": 0.091,
+      "expectancy": -726.86
+    },
+    "vwap_reclaim": {
+      "trades": 7,
+      "wins": 4,
+      "losses": 3,
+      "pnl": 970.66,
+      "win_rate": 0.571,
+      "expectancy": 138.67
+    },
+    "vwap_trend": {
+      "trades": 32,
+      "wins": 25,
+      "losses": 7,
+      "pnl": 197806.58,
+      "win_rate": 0.781,
+      "expectancy": 6181.46
+    },
+    "trend_day": {
+      "trades": 4,
+      "wins": 0,
+      "losses": 4,
+      "pnl": -9478.3,
+      "win_rate": 0.0,
+      "expectancy": -2369.57
+    },
+    "pdh_pdl_break": {
+      "trades": 5,
+      "wins": 1,
+      "losses": 4,
+      "pnl": 92.19,
+      "win_rate": 0.2,
+      "expectancy": 18.44
+    },
+    "momentum_continuation": {
+      "trades": 12,
+      "wins": 9,
+      "losses": 3,
+      "pnl": 38788.75,
+      "win_rate": 0.75,
+      "expectancy": 3232.4
+    },
+    "vwap_pullback": {
+      "trades": 14,
+      "wins": 12,
+      "losses": 2,
+      "pnl": 72265.43,
+      "win_rate": 0.857,
+      "expectancy": 5161.82
+    }
+  },
+  "updated_at": "2026-09-13T05:30:02.405444+00:00"
+}

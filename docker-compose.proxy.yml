@@ -1,0 +1,31 @@
+# Traefik path routing for Algo-Flat Sensex (public: /algo-flat-sensex → web-app:8080)
+# Used with: docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.proxy.yml up -d
+services:
+  postgres:
+    ports: !reset []
+
+  trading-engine:
+    ports: !reset []
+
+  web-app:
+    ports: !reset []
+    build:
+      context: ./web-app
+      args:
+        VITE_BASE_PATH: /algo-flat-sensex/
+    networks:
+      - default
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.algo-flat-sensex.rule=PathPrefix(`/algo-flat-sensex`)
+      - traefik.http.routers.algo-flat-sensex.entrypoints=web,websecure
+      - traefik.http.routers.algo-flat-sensex.priority=50
+      - traefik.http.routers.algo-flat-sensex.middlewares=algo-flat-sensex-strip
+      - traefik.http.middlewares.algo-flat-sensex-strip.stripprefix.prefixes=/algo-flat-sensex
+      - traefik.http.services.algo-flat-sensex.loadbalancer.server.port=8080
+
+networks:
+  proxy:
+    external: true

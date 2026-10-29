@@ -1,0 +1,11 @@
+# Broker provider: flattrade | upstox
+provider: flattrade
+api_base_url: "https://piconnect.flattrade.in/PiConnectAPI/"
+websocket_url: "wss://piconnect.flattrade.in/PiConnectWSAPI/"
+reconnect_backoff_seconds: [1, 2, 4, 8, 16, 32, 60]
+stale_feed_seconds: 45
+token_refresh_before_expiry_minutes: 30
+# REST quote poll interval when WebSocket backup is active (Upstox); unused by Flattrade WS
+rest_poll_interval_seconds: 1.5
+use_websocket_feed: true
+websocket_feed_mode: ltpc

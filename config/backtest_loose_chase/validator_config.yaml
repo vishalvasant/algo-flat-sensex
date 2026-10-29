@@ -1,0 +1,279 @@
+validator_version: validator_v1.8.1_option_chart_mtf
+entry_start_time: "09:30"
+entry_end_time: "15:00"
+max_spread_pct: 1.5
+# Enforced when broker sends volume/OI (skipped only if field missing).
+min_option_volume: 5000
+min_option_oi: 25000
+# Allow expiry-day trades with stricter gates (never hard-block all entries).
+expiry_day_block_entries: false
+cooldown_after_exit_seconds: 20
+cooldown_after_exit_minutes: 0
+# When false, enforce volume/OI/spread when broker provides them (better pre-trade checks).
+paper_relaxed_liquidity: false
+required_fields:
+  - ltp
+  - bid
+  - ask
+  - oi
+
+# Weekly expiry: require higher confidence only (theta handled in quality gate + 50% deploy cap).
+expiry_day_cautious:
+  enabled: true
+  min_confidence: 78
+
+# Session phases inside entry window — stricter at open/close.
+time_of_day_cautious:
+  enabled: true
+  phases:
+    open:
+      start: "09:30"
+      end: "10:15"
+      min_confidence: 72
+      min_mtf_score: 14
+      allowed_setups:
+        - opening_range_breakout
+        - momentum_continuation
+        - trend_day
+        - gap_and_go
+        - pdh_pdl_break
+        - peak_reversal_fade
+        - gap_fade
+        - delta_momentum
+        - vwap_pullback
+        - vwap_trend
+    mid:
+      start: "10:15"
+      end: "14:30"
+    late:
+      start: "14:30"
+      end: "15:00"
+      min_confidence: 75
+      min_mtf_score: 14
+      blocked_setups:
+        - expiry_scalping
+        - momentum_continuation
+        - vwap_trend
+
+trap_avoidance:
+  enabled: true
+  require_spot_vwap_alignment: true
+  spot_vwap_buffer_points: 10
+  blocked_setups:
+    - vwap_bounce
+    - mean_reversion
+    - reversal
+    - ema_pullback
+  require_ema_alignment_for:
+    - vwap_pullback
+    - trend_continuation
+    - vwap_trend
+    - momentum_continuation
+  block_reversal_flips: false
+  max_confidence_if_spot_vwap_against: 70
+  require_bias_side_match: true
+  require_1m_5m_bias_agree: true
+  require_5m_structure_align: true
+  require_3m_bars_with_bias: true
+  min_3m_bars_with_bias: 2
+  require_pullback_trigger: true
+  require_mtf_alignment: true
+  # Live Aug 13: selected ORB PE conf~90 but mtf_score_pe~9 → 0 fills.
+  # Pattern score is sparse on chop; keep a soft floor, not a hard wall.
+  # Scalp v3.0 — softer MTF floor on fast premium moves (was 18 / 15).
+  min_mtf_score: 12
+  strict_breakout_setups:
+    - opening_range_breakout
+    - gap_and_go
+    - pdh_pdl_break
+  min_mtf_score_breakout: 10
+  or_break_buffer_points: 0
+  levels:
+    entry_filter_enabled: true
+    proximity_points: 20
+    require_close_beyond_level: true
+    break_buffer_points: 5
+    # Breakouts ARE the support/resistance break — don't trap them as "into level".
+    entry_filter_exempt_setups:
+      - opening_range_breakout
+      - gap_and_go
+      - pdh_pdl_break
+      - oi_breakout
+
+  # Counter-bias fade (peak_reversal_fade): 5m/15m reversal + greeks gate.
+  counter_bias:
+    enabled: true
+    min_extension_points: 18
+    min_reversal_signals: 2
+    min_counter_mtf_score: 48
+    require_1m_turn: true
+    require_greeks: true
+    min_abs_delta: 0.30
+    max_abs_delta: 0.55
+    min_gamma: 0.0004
+    max_iv: 0.85
+    require_oi_confirm: false
+    mismatch_min_extension_points: 12
+    mismatch_min_reversal_signals: 1
+
+  # Block trend CE on gap-down (and PE on gap-up) until OR breaks.
+  gap_open:
+    enabled: true
+    min_gap_points: 35
+    trend_blocked_setups:
+      - vwap_trend
+      - vwap_reclaim
+      - vwap_pullback
+      - momentum_continuation
+      - trend_day
+      - ema_pullback
+
+# NIFTY FUT must confirm CE/PE direction vs session VWAP before final entry.
+fut_momentum_confirm:
+  enabled: true
+  vwap_buffer_points: 0
+  reject_if_unknown: false
+  exempt_setups:
+    - peak_reversal_fade
+    - level_rejection
+    - gap_fade
+    - trend_reversal_flip
+    - liquidity_sweep
+
+# Block trend entries when NIFTY FUT and cash index diverge beyond threshold.
+basis_gate:
+  enabled: true
+  max_abs_basis_points: 30
+  max_basis_pct_of_spot: 0.008
+  basis_dte_multiplier: 2.5
+  reject_if_unknown: false
+  exempt_setups:
+    - peak_reversal_fade
+    - level_rejection
+    - gap_fade
+    - trend_reversal_flip
+    - liquidity_sweep
+
+# Reject entries when spot moved but option premium did not follow (expiry/sideways).
+premium_responsive:
+  enabled: true
+  max_samples: 12
+  min_spot_move_pct: 0.03
+  min_premium_move_pct: 0.5
+  lookback_samples: 4
+  apply_regimes:
+    - expiry_behaviour
+    - sideways
+  apply_setups:
+    - expiry_scalping
+    - level_rejection
+    - peak_reversal_fade
+
+# CE/PE entry veto — premium responsiveness + greeks + side MTF (Phase 2).
+option_entry_veto:
+  enabled: true
+  require_premium_responsive: true
+  require_mi_premium_confirm: true
+  reject_if_premium_unknown: true
+  min_side_mtf_score: 15
+  min_abs_delta: 0.30
+  max_abs_delta: 0.75
+  max_spread_pct: 10
+  min_spot_move_pct: 0.02
+  min_premium_move_pct: 0.35
+  lookback_samples: 4
+  exempt_setups:
+    - trend_reversal_flip
+  mtf_weak_apply_setups:
+    - vwap_trend
+    - vwap_reclaim
+    - vwap_pullback
+    - momentum_continuation
+    - delta_momentum
+    - trend_day
+  premium_responsive_apply_setups:
+    - expiry_scalping
+    - level_rejection
+    - peak_reversal_fade
+  apply_setups:
+    - vwap_trend
+    - vwap_reclaim
+    - vwap_pullback
+    - momentum_continuation
+    - opening_range_breakout
+    - gap_and_go
+    - gap_fade
+    - peak_reversal_fade
+    - level_rejection
+    - pdh_pdl_break
+    - delta_momentum
+    - expiry_scalping
+    - trend_reversal_flip
+
+# Phase 3 — CE/PE premium chart confirmation (1m/3m/5m + spot divergence).
+# Softened after live Aug 10/12 zero-pass flood (premium_below_vwap / m1_weak).
+option_chart_confirm:
+  enabled: true
+  allow_if_no_bars: true
+  unavailable_policy: allow
+  min_closed_m1_bars: 5
+  require_above_premium_vwap: true
+  vwap_buffer_pct: 0.25
+  require_m1_momentum: true
+  m1_momentum_lookback: 3
+  min_m1_momentum_pct: 0.10
+  require_m3_aligned: false
+  min_m3_bars: 3
+  require_m5_aligned: false
+  min_m5_bars: 2
+  require_higher_low_structure: false
+  block_premium_decay: true
+  decay_lookback_bars: 5
+  max_premium_decay_pct: 3.0
+  block_spot_premium_divergence: true
+  divergence_lookback_bars: 5
+  min_spot_move_pct_for_divergence: 0.08
+  max_premium_flat_pct: 0.35
+  min_alignment_score: 20
+  exempt_setups:
+    - trend_reversal_flip
+  apply_setups:
+    - vwap_trend
+    - vwap_reclaim
+    - vwap_pullback
+    - momentum_continuation
+    - opening_range_breakout
+    - gap_and_go
+    - gap_fade
+    - peak_reversal_fade
+    - level_rejection
+    - pdh_pdl_break
+    - delta_momentum
+    - trend_day
+    - expiry_scalping
+    - oi_breakout
+  setup_overrides:
+    trend_day:
+      min_m1_momentum_pct: 0.35
+      max_premium_decay_pct: 0.8
+      min_alignment_score: 65
+      require_higher_low_structure: true
+    opening_range_breakout:
+      require_m3_aligned: true
+      min_alignment_score: 60
+      block_spot_premium_divergence: true
+
+# Pause ORB/expiry scalping on weekly expiry after first hard stop-out.
+session_loss_guard:
+  enabled: true
+  expiry_day:
+    block_after_losses: 1
+    aggressive_setups:
+      - opening_range_breakout
+      - expiry_scalping
+    trigger_exit_reasons:
+      - adverse_momentum
+      - early_invalidation
+    blocked_setups:
+      - opening_range_breakout
+      - expiry_scalping

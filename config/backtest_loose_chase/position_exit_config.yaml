@@ -1,0 +1,57 @@
+# Exit: confidence-scaled ~4% hard SL; breakeven trail when green; +2% step trail after +4% MFE.
+# Priority: force/session end → hard SL → trail → trend reversal (after min hold).
+mode: momentum
+bias_flip_exit: true
+bias_flip_buffer_points: 15
+flip_on_trend_reversal: true
+flip_exit_reasons:
+  - trend_reversal
+
+min_hold_seconds: 15
+# Adopted broker holdings need stable quotes before soft exits (trail / early cut).
+broker_adopted_min_hold_seconds: 60
+post_exit_adopt_cooldown_seconds: 20
+max_ltp_jump_pct_per_tick: 15
+exit_confirm_ticks: 2
+trend_reversal_min_hold_seconds: 180
+trend_reversal_skip_when_profitable: true
+trend_reversal_only_if_underwater: true
+trend_reversal_defer_if_had_mfe: true
+trend_reversal_min_mfe_pct: 3
+
+max_hold_minutes: 25
+skip_time_stop_when_profitable: true
+
+max_loss_inr_per_trade: 0
+
+# Up to 5% stop when entry quality is good; tighter when greeks/volume weak.
+adverse_move_pct_from_entry: 5
+adverse_move_min_pct: 4
+confidence_adverse_scaling: true
+adverse_base_confidence: 76
+adverse_max_confidence: 100
+high_vol_adverse_move_pct_from_entry: 4
+
+# Tighter hard stop when entry had weak greeks / liquidity confirmation.
+weak_entry_adverse_pct: 2.5
+weak_entry_greeks_mult_threshold: 0.80
+
+# Separate thesis invalidation from premium noise on early cuts (spec §12).
+require_thesis_invalidation_for_early_cut: true
+thesis_invalidation_enabled: true
+
+# Scalp v3.0 — arm breakeven sooner on small green (was 2%).
+trail_breakeven_arm_mfe_pct: 1.5
+
+early_invalidation_enabled: true
+early_invalidation_min_hold_seconds: 45
+early_invalidation_max_mfe_pct: 2
+early_invalidation_loss_pct: 5
+# ORB is volatile at the open — use adverse stop only, not the tight early cut.
+early_invalidation_exempt_setups:
+  - opening_range_breakout
+  - broker_adopted
+
+# Scalp v3.0 — lock profit earlier after small MFE spike (was 4% / 2%).
+trail_step_arm_mfe_pct: 2.5
+trail_step_buffer_pct: 1.5

@@ -1,0 +1,8 @@
+timezone: Asia/Kolkata
+market_open: "09:15"
+market_close: "15:30"
+# Live entries only inside this window (see validator_config entry_start/end).
+trading_window_open: "09:30"
+trading_window_close: "15:00"
+pre_warm_minutes: 5
+holidays_file: config/nse_holidays.json
